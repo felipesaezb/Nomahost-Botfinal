@@ -1,14 +1,11 @@
-import express from "express";
-import fetch from "node-fetch";
-import cors from "cors";
+const express = require("express");
+const fetch = require("node-fetch");
+const cors = require("cors");
 
 const app = express();
 
-// 🔥 ESTE ES EL FIX REAL
 app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST"],
-  allowedHeaders: ["Content-Type"]
+  origin: "*"
 }));
 
 app.use(express.json());
@@ -24,7 +21,7 @@ app.post("/chat", async (req, res) => {
   try {
     const { message } = req.body;
 
-    console.log("Mensaje recibido:", message);
+    console.log("Mensaje:", message);
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -53,4 +50,6 @@ app.post("/chat", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log("Servidor corriendo"));
+app.listen(PORT, () => {
+  console.log("Servidor corriendo en puerto " + PORT);
+});
