@@ -1,23 +1,18 @@
 import express from "express";
 import fetch from "node-fetch";
-import cors from "cors";
 
 const app = express();
-
-app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 const API_KEY = process.env.OPENAI_API_KEY;
 
-const SYSTEM_PROMPT = `Pega aquí EXACTAMENTE tu prompt completo (el que ya tienes)`;
-
-// 🔥 TEST ROUTE
+// 👉 Ruta para probar si el server está vivo
 app.get("/", (req, res) => {
   res.send("Servidor activo 🚀");
 });
 
-// 🔥 CHAT ROUTE
+// 👉 Ruta del chatbot
 app.post("/chat", async (req, res) => {
   try {
     const { message } = req.body;
@@ -31,26 +26,31 @@ app.post("/chat", async (req, res) => {
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: message }
+          {
+            role: "system",
+            content: "Eres Felipe de Nomahost, experto en hotelería y ventas."
+          },
+          {
+            role: "user",
+            content: message
+          }
         ]
       })
     });
 
     const data = await response.json();
 
-    // 🔥 VALIDACIÓN CLAVE
-    if (!data.choices) {
-      console.error("ERROR OPENAI:", data);
-      return res.status(500).json({ reply: "Error interno del bot" });
-    }
+    const reply = data.choices?.[0]?.message?.content || "Error del bot";
 
-    res.json({ reply: data.choices[0].message.content });
+    res.json({ reply });
 
   } catch (error) {
-    console.error("ERROR SERVER:", error);
-    res.status(500).json({ reply: "Error conectando con el bot" });
+    console.error("ERROR:", error);
+    res.status(500).json({ reply: "Error del servidor" });
   }
 });
 
-app.listen(PORT, () => console.log("running on port " + PORT));
+// 👉 Levantar servidor
+app.listen(PORT, () => {
+  console.log("Servidor corriendo en puerto " + PORT);
+});
