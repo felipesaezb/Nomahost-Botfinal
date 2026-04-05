@@ -3,37 +3,24 @@ import fetch from "node-fetch";
 import cors from "cors";
 
 const app = express();
-
-app.use(cors({
-  origin: "*"
-}));
-
+app.use(cors());
 app.use(express.json());
-
-const PORT = process.env.PORT || 3000;
-const API_KEY = process.env.OPENAI_API_KEY;
-
-app.get("/", (req, res) => {
-  res.send("Servidor activo 🚀");
-});
 
 app.post("/chat", async (req, res) => {
   try {
-    const { message } = req.body;
-
-    console.log("Mensaje:", message);
+    const userMessage = req.body.message;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${API_KEY}`,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
-          { role: "system", content: "Eres Felipe de Nomahost" },
-          { role: "user", content: message }
+          { role: "system", content: "Eres Felipe, un experto en hotelería, ventas y automatización con Nomahost. Respondes claro, profesional y cercano." },
+          { role: "user", content: userMessage }
         ]
       })
     });
@@ -41,15 +28,15 @@ app.post("/chat", async (req, res) => {
     const data = await response.json();
 
     res.json({
-      reply: data.choices?.[0]?.message?.content || "Error"
+      reply: data.choices?.[0]?.message?.content || "No pude responder."
     });
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ reply: "Error del servidor" });
+    res.status(500).json({ error: "Error en el servidor" });
   }
 });
 
-app.listen(PORT, () => {
-  console.log("Servidor corriendo en puerto " + PORT);
+app.listen(3000, () => {
+  console.log("Servidor activo 🚀");
 });
